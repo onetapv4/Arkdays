@@ -132,6 +132,25 @@ public class account {
         result.put("ts", ts);
         return result;
     }
+    import javax.servlet.http.HttpServletRequest;
+
+public class MyClass {
+    public Map<String, Object> payGetUnconfirmedOrderIdList(HttpServletRequest request) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("orderIdList", new ArrayList<String>());
+        Map<String, Object> playerDataDelta = new HashMap<>();
+        playerDataDelta.put("deleted", new HashMap<String, Object>());
+        playerDataDelta.put("modified", new HashMap<String, Object>());
+        data.put("playerDataDelta", playerDataDelta);
+        return data;
+    }
+    
+    public Map<String, Object> paygetAllProductList(HttpServletRequest request) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("productList", new ArrayList<String>());
+        return data;
+    }
+}
 
     @PostMapping(value={"/syncStatus"}, produces={"application/json;charset=UTF-8"})
     public JSONObject SyncStatus(@RequestHeader(value="secret") String secret, HttpServletResponse response, HttpServletRequest request) {
