@@ -1,50 +1,22 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.hypergryph.arknights.command.CommandActivity
- *  com.hypergryph.arknights.command.CommandBan
- *  com.hypergryph.arknights.command.CommandGive
- *  com.hypergryph.arknights.command.CommandHandler
- *  com.hypergryph.arknights.command.CommandHelp
- *  com.hypergryph.arknights.command.CommandMail
- *  com.hypergryph.arknights.command.CommandManager
- *  com.hypergryph.arknights.command.CommandReload
- *  com.hypergryph.arknights.command.CommandStop
- *  com.hypergryph.arknights.command.CommandUnBan
- *  com.hypergryph.arknights.command.CommandUnLock
- *  com.hypergryph.arknights.command.CommandUpgrade
- *  com.hypergryph.arknights.command.ICommand
- *  java.lang.Object
+/*    */ package BOOT-INF.classes.com.hypergryph.arknights.command;
+/*    */ 
+/*    */ public class CommandManager extends CommandHandler {
+/*    */   public CommandManager() {
+/*  5 */     registerCommand((ICommand)new CommandHelp());
+/*  6 */     registerCommand((ICommand)new CommandReload());
+/*  7 */     registerCommand((ICommand)new CommandBan());
+/*  8 */     registerCommand((ICommand)new CommandUnBan());
+/*  9 */     registerCommand((ICommand)new CommandStop());
+/* 10 */     registerCommand((ICommand)new CommandGive());
+/* 11 */     registerCommand((ICommand)new CommandMail());
+/* 12 */     registerCommand((ICommand)new CommandUpgrade());
+/* 13 */     registerCommand((ICommand)new CommandUnLock());
+/* 14 */     registerCommand((ICommand)new CommandActivity());
+/*    */   }
+/*    */ }
+
+
+/* Location:              C:\Users\administered\Desktop\LocalArknights 1.9.4\hypergryph-1.9.4 Beta 3.jar!\BOOT-INF\classes\com\hypergryph\arknights\command\CommandManager.class
+ * Java compiler version: 8 (52.0)
+ * JD-Core Version:       1.1.3
  */
-package com.hypergryph.arknights.command;
-
-import com.hypergryph.arknights.command.CommandActivity;
-import com.hypergryph.arknights.command.CommandBan;
-import com.hypergryph.arknights.command.CommandGive;
-import com.hypergryph.arknights.command.CommandHandler;
-import com.hypergryph.arknights.command.CommandHelp;
-import com.hypergryph.arknights.command.CommandMail;
-import com.hypergryph.arknights.command.CommandReload;
-import com.hypergryph.arknights.command.CommandStop;
-import com.hypergryph.arknights.command.CommandUnBan;
-import com.hypergryph.arknights.command.CommandUnLock;
-import com.hypergryph.arknights.command.CommandUpgrade;
-import com.hypergryph.arknights.command.ICommand;
-
-public class CommandManager
-extends CommandHandler {
-    public CommandManager() {
-        this.registerCommand((ICommand)new CommandHelp());
-        this.registerCommand((ICommand)new CommandReload());
-        this.registerCommand((ICommand)new CommandBan());
-        this.registerCommand((ICommand)new CommandUnBan());
-        this.registerCommand((ICommand)new CommandStop());
-        this.registerCommand((ICommand)new CommandGive());
-        this.registerCommand((ICommand)new CommandMail());
-        this.registerCommand((ICommand)new CommandUpgrade());
-        this.registerCommand((ICommand)new CommandUnLock());
-        this.registerCommand((ICommand)new CommandActivity());
-    }
-}
-

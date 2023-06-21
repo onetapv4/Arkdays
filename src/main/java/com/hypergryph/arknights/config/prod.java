@@ -1,117 +1,136 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.alibaba.fastjson.JSONObject
- *  com.hypergryph.arknights.ArknightsApplication
- *  com.hypergryph.arknights.config.prod
- *  java.lang.CharSequence
- *  java.lang.Object
- *  java.lang.String
- *  java.util.Map$Entry
- *  javax.servlet.http.HttpServletRequest
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.RestController
+/*     */ package BOOT-INF.classes.com.hypergryph.arknights.config;
+/*     */ 
+/*     */ import com.alibaba.fastjson.JSONObject;
+/*     */ import com.hypergryph.arknights.ArknightsApplication;
+/*     */ import com.hypergryph.arknights.core.function.randomPwd;
+/*     */ import java.util.Map;
+/*     */ import javax.servlet.http.HttpServletRequest;
+/*     */ import org.springframework.web.bind.annotation.RequestMapping;
+/*     */ import org.springframework.web.bind.annotation.RestController;
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */ @RestController
+/*     */ @RequestMapping({"/config/prod"})
+/*     */ public class prod
+/*     */ {
+/*     */   @RequestMapping({"/official/refresh_config"})
+/*     */   public JSONObject RefreshConfig() {
+/*  20 */     ArknightsApplication.reloadServerConfig();
+/*  21 */     JSONObject result = new JSONObject(true);
+/*  22 */     result.put("statusCode", Integer.valueOf(200));
+/*  23 */     return result;
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   @RequestMapping({"/official/remote_config"})
+/*     */   public JSONObject RemoteConfig(HttpServletRequest request) {
+/*  32 */     return ArknightsApplication.serverConfig.getJSONObject("remote");
+/*     */   }
+/*     */ 
+/*     */   
+/*     */   @RequestMapping({"/official/network_config"})
+/*     */   public JSONObject NetworkConfig(HttpServletRequest request) {
+/*  38 */     String clientIp = ArknightsApplication.getIpAddr(request);
+/*  39 */     ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/official/network_config");
+/*     */     
+/*  41 */     JSONObject server_network = ArknightsApplication.serverConfig.getJSONObject("network");
+/*  42 */     JSONObject network = new JSONObject(true);
+/*  43 */     network.put("sign", server_network.getString("sign"));
+/*  44 */     JSONObject content = new JSONObject(true);
+/*  45 */     JSONObject configs = server_network.getJSONObject("configs");
+/*  46 */     content.put("configVer", server_network.getString("configVer"));
+/*  47 */     content.put("funcVer", server_network.getString("funcVer"));
+/*     */     
+/*  49 */     for (Map.Entry entry : configs.entrySet()) {
+/*  50 */       JSONObject funcNetwork = configs.getJSONObject(entry.getKey().toString()).getJSONObject("network");
+/*  51 */       for (Map.Entry funcNetworkEntry : funcNetwork.entrySet()) {
+/*  52 */         String value = funcNetwork.getString(funcNetworkEntry.getKey().toString());
+/*  53 */         funcNetwork.put(funcNetworkEntry.getKey().toString(), value.replace("{server}", ArknightsApplication.serverConfig.getJSONObject("server").getString("url")));
+/*     */       } 
+/*     */     } 
+/*     */     
+/*  57 */     content.put("configs", configs);
+/*  58 */     network.put("content", content.toJSONString());
+/*  59 */     return network;
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   @RequestMapping({"/official/Android/version"})
+/*     */   public JSONObject AndroidVersion(HttpServletRequest request) {
+/*  67 */     JSONObject version = new JSONObject();
+/*  68 */     version.put("resVersion", "22-02-18-07-51-58-" + randomPwd.randomHash(6));
+/*  69 */     version.put("clientVersion", ArknightsApplication.serverConfig.getJSONObject("version").getJSONObject("android").getString("clientVersion"));
+/*  70 */     return version;
+/*     */   }
+/*     */   
+/*     */   @RequestMapping({"/official/IOS/version"})
+/*     */   public JSONObject IosVersion(HttpServletRequest request) {
+/*  75 */     String clientIp = ArknightsApplication.getIpAddr(request);
+/*  76 */     ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/official/IOS/version");
+/*  77 */     return ArknightsApplication.serverConfig.getJSONObject("version").getJSONObject("ios");
+/*     */   }
+/*     */   
+/*     */   @RequestMapping({"/b/remote_config"})
+/*     */   public JSONObject BRemoteConfig(HttpServletRequest request) {
+/*  82 */     String clientIp = ArknightsApplication.getIpAddr(request);
+/*  83 */     ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/b/remote_config");
+/*     */     
+/*  85 */     return ArknightsApplication.serverConfig.getJSONObject("remote");
+/*     */   }
+/*     */   
+/*     */   @RequestMapping({"/b/network_config"})
+/*     */   public JSONObject BNetworkConfig(HttpServletRequest request) {
+/*  90 */     String clientIp = ArknightsApplication.getIpAddr(request);
+/*  91 */     ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/b/network_config");
+/*  92 */     return ArknightsApplication.serverConfig.getJSONObject("network");
+/*     */   }
+/*     */   
+/*     */   @RequestMapping({"/b/Android/version"})
+/*     */   public JSONObject BAndroidVersion(HttpServletRequest request) {
+/*  97 */     String clientIp = ArknightsApplication.getIpAddr(request);
+/*  98 */     ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/b/Android/version");
+/*  99 */     return ArknightsApplication.serverConfig.getJSONObject("version").getJSONObject("android");
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   @RequestMapping({"/announce_meta/Android/preannouncement.meta.json"})
+/*     */   public JSONObject PreAnnouncement(HttpServletRequest request) {
+/* 107 */     return ArknightsApplication.serverConfig.getJSONObject("announce").getJSONObject("preannouncement");
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   @RequestMapping({"/announce_meta/Android/announcement.meta.json"})
+/*     */   public JSONObject announcement(HttpServletRequest request) {
+/* 114 */     return ArknightsApplication.serverConfig.getJSONObject("announce").getJSONObject("announcement");
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   @RequestMapping({"/announce_meta/IOS/preannouncement.meta.json"})
+/*     */   public JSONObject IOSPreAnnouncement(HttpServletRequest request) {
+/* 121 */     return ArknightsApplication.serverConfig.getJSONObject("announce").getJSONObject("preannouncement");
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   @RequestMapping({"/announce_meta/IOS/announcement.meta.json"})
+/*     */   public JSONObject IOSannouncement(HttpServletRequest request) {
+/* 128 */     return ArknightsApplication.serverConfig.getJSONObject("announce").getJSONObject("announcement");
+/*     */   }
+/*     */ }
+
+
+/* Location:              C:\Users\administered\Desktop\LocalArknights 1.9.4\hypergryph-1.9.4 Beta 3.jar!\BOOT-INF\classes\com\hypergryph\arknights\config\prod.class
+ * Java compiler version: 8 (52.0)
+ * JD-Core Version:       1.1.3
  */
-package com.hypergryph.arknights.config;
-
-import com.alibaba.fastjson.JSONObject;
-import com.hypergryph.arknights.ArknightsApplication;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-@RequestMapping(value={"/config/prod"})
-public class prod {
-    @RequestMapping(value={"/official/refresh_config"})
-    public JSONObject RefreshConfig() {
-        ArknightsApplication.reloadServerConfig();
-        JSONObject result = new JSONObject(true);
-        result.put("statusCode", 200);
-        return result;
-    }
-
-    @RequestMapping(value={"/official/remote_config"})
-    public JSONObject RemoteConfig(HttpServletRequest request) {
-        return ArknightsApplication.serverConfig.getJSONObject("remote");
-    }
-
-    @RequestMapping(value={"/official/network_config"})
-    public JSONObject NetworkConfig(HttpServletRequest request) {
-        String clientIp = ArknightsApplication.getIpAddr((HttpServletRequest)request);
-        ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/official/network_config");
-        JSONObject server_network = ArknightsApplication.serverConfig.getJSONObject("network");
-        JSONObject network2 = new JSONObject(true);
-        network2.put("sign", server_network.getString("sign"));
-        JSONObject content = new JSONObject(true);
-        JSONObject configs = server_network.getJSONObject("configs");
-        content.put("configVer", server_network.getString("configVer"));
-        content.put("funcVer", server_network.getString("funcVer"));
-        for (Map.Entry entry : configs.entrySet()) {
-            JSONObject funcNetwork = configs.getJSONObject(entry.getKey().toString()).getJSONObject("network");
-            for (Map.Entry funcNetworkEntry : funcNetwork.entrySet()) {
-                String value = funcNetwork.getString(funcNetworkEntry.getKey().toString());
-                funcNetwork.put(funcNetworkEntry.getKey().toString(), value.replace((CharSequence)"{server}", (CharSequence)ArknightsApplication.serverConfig.getJSONObject("server").getString("url")));
-            }
-        }
-        content.put("configs", configs);
-        network2.put("content", content.toJSONString());
-        return network2;
-    }
-
-    @RequestMapping(value={"/official/Android/version"})
-    public JSONObject AndroidVersion(HttpServletRequest request) {
-        return ArknightsApplication.serverConfig.getJSONObject("version").getJSONObject("android");
-    }
-
-    @RequestMapping(value={"/official/IOS/version"})
-    public JSONObject IosVersion(HttpServletRequest request) {
-        String clientIp = ArknightsApplication.getIpAddr((HttpServletRequest)request);
-        ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/official/IOS/version");
-        return ArknightsApplication.serverConfig.getJSONObject("version").getJSONObject("ios");
-    }
-
-    @RequestMapping(value={"/b/remote_config"})
-    public JSONObject BRemoteConfig(HttpServletRequest request) {
-        String clientIp = ArknightsApplication.getIpAddr((HttpServletRequest)request);
-        ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/b/remote_config");
-        return ArknightsApplication.serverConfig.getJSONObject("remote");
-    }
-
-    @RequestMapping(value={"/b/network_config"})
-    public JSONObject BNetworkConfig(HttpServletRequest request) {
-        String clientIp = ArknightsApplication.getIpAddr((HttpServletRequest)request);
-        ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/b/network_config");
-        return ArknightsApplication.serverConfig.getJSONObject("network");
-    }
-
-    @RequestMapping(value={"/b/Android/version"})
-    public JSONObject BAndroidVersion(HttpServletRequest request) {
-        String clientIp = ArknightsApplication.getIpAddr((HttpServletRequest)request);
-        ArknightsApplication.LOGGER.info("[/" + clientIp + "] /config/prod/b/Android/version");
-        return ArknightsApplication.serverConfig.getJSONObject("version").getJSONObject("android");
-    }
-
-    @RequestMapping(value={"/announce_meta/Android/preannouncement.meta.json"})
-    public JSONObject PreAnnouncement(HttpServletRequest request) {
-        return ArknightsApplication.serverConfig.getJSONObject("announce").getJSONObject("preannouncement");
-    }
-
-    @RequestMapping(value={"/announce_meta/Android/announcement.meta.json"})
-    public JSONObject announcement(HttpServletRequest request) {
-        return ArknightsApplication.serverConfig.getJSONObject("announce").getJSONObject("announcement");
-    }
-
-    @RequestMapping(value={"/announce_meta/IOS/preannouncement.meta.json"})
-    public JSONObject IOSPreAnnouncement(HttpServletRequest request) {
-        return ArknightsApplication.serverConfig.getJSONObject("announce").getJSONObject("preannouncement");
-    }
-
-    @RequestMapping(value={"/announce_meta/IOS/announcement.meta.json"})
-    public JSONObject IOSannouncement(HttpServletRequest request) {
-        return ArknightsApplication.serverConfig.getJSONObject("announce").getJSONObject("announcement");
-    }
-}
-

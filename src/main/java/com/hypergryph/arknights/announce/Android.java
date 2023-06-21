@@ -1,32 +1,26 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.hypergryph.arknights.announce.Android
- *  com.hypergryph.arknights.core.file.IOTools
- *  java.lang.Object
- *  java.lang.String
- *  java.lang.System
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.RestController
+/*    */ package BOOT-INF.classes.com.hypergryph.arknights.announce;
+/*    */ 
+/*    */ import com.hypergryph.arknights.core.file.IOTools;
+/*    */ import org.springframework.web.bind.annotation.RequestMapping;
+/*    */ import org.springframework.web.bind.annotation.RestController;
+/*    */ 
+/*    */ @RestController
+/*    */ @RequestMapping({"/announce"})
+/*    */ public class Android
+/*    */ {
+/*    */   @RequestMapping({"/Android/preannouncement/280_1618473718.html"})
+/*    */   public String PreAnnouncement() {
+/* 13 */     return IOTools.ReadNormalFile(System.getProperty("user.dir") + "/data/static/announcement/280_1618473718.html");
+/*    */   }
+/*    */   
+/*    */   @RequestMapping({"/Android/css/preannouncement.v_0_1_2.css"})
+/*    */   public String PreAnnouncementCss() {
+/* 18 */     return IOTools.ReadNormalFile(System.getProperty("user.dir") + "/data/static/css/preannouncement.v_0_1_2.css");
+/*    */   }
+/*    */ }
+
+
+/* Location:              C:\Users\administered\Desktop\LocalArknights 1.9.4\hypergryph-1.9.4 Beta 3.jar!\BOOT-INF\classes\com\hypergryph\arknights\announce\Android.class
+ * Java compiler version: 8 (52.0)
+ * JD-Core Version:       1.1.3
  */
-package com.hypergryph.arknights.announce;
-
-import com.hypergryph.arknights.core.file.IOTools;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-@RequestMapping(value={"/announce"})
-public class Android {
-    @RequestMapping(value={"/Android/preannouncement/280_1618473718.html"})
-    public String PreAnnouncement() {
-        return IOTools.ReadNormalFile((String)(System.getProperty((String)"user.dir") + "/data/static/announcement/280_1618473718.html"));
-    }
-
-    @RequestMapping(value={"/Android/css/preannouncement.v_0_1_2.css"})
-    public String PreAnnouncementCss() {
-        return IOTools.ReadNormalFile((String)(System.getProperty((String)"user.dir") + "/data/static/css/preannouncement.v_0_1_2.css"));
-    }
-}
-

@@ -1,238 +1,326 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  cn.hutool.core.date.DateUtil
- *  com.alibaba.fastjson.JSONObject
- *  com.hypergryph.arknights.ArknightsApplication
- *  com.hypergryph.arknights.command.CommandManager
- *  com.hypergryph.arknights.command.ICommandSender
- *  com.hypergryph.arknights.console
- *  com.hypergryph.arknights.core.dao.mailDao
- *  com.hypergryph.arknights.core.dao.userDao
- *  com.hypergryph.arknights.core.file.IOTools
- *  com.hypergryph.arknights.core.function.randomPwd
- *  java.lang.CharSequence
- *  java.lang.Class
- *  java.lang.Exception
- *  java.lang.Integer
- *  java.lang.Object
- *  java.lang.String
- *  java.lang.System
- *  java.net.InetAddress
- *  java.net.UnknownHostException
- *  java.util.Date
- *  javax.servlet.http.HttpServletRequest
- *  javax.sql.DataSource
- *  org.apache.logging.log4j.LogManager
- *  org.apache.logging.log4j.Logger
- *  org.springframework.boot.Banner$Mode
- *  org.springframework.boot.SpringApplication
- *  org.springframework.boot.autoconfigure.SpringBootApplication
- *  org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
- *  org.springframework.jdbc.core.JdbcTemplate
- *  org.springframework.jdbc.datasource.DriverManagerDataSource
- *  org.springframework.util.StringUtils
+/*     */ package BOOT-INF.classes.com.hypergryph.arknights;
+/*     */ 
+/*     */ import cn.hutool.core.date.DateUtil;
+/*     */ import com.alibaba.fastjson.JSONArray;
+/*     */ import com.alibaba.fastjson.JSONObject;
+/*     */ import com.hypergryph.arknights.command.CommandManager;
+/*     */ import com.hypergryph.arknights.command.ICommandSender;
+/*     */ import com.hypergryph.arknights.console;
+/*     */ import com.hypergryph.arknights.core.dao.mailDao;
+/*     */ import com.hypergryph.arknights.core.dao.userDao;
+/*     */ import com.hypergryph.arknights.core.file.IOTools;
+/*     */ import com.hypergryph.arknights.core.function.randomPwd;
+/*     */ import java.io.ByteArrayOutputStream;
+/*     */ import java.io.File;
+/*     */ import java.io.IOException;
+/*     */ import java.io.InputStream;
+/*     */ import java.net.InetAddress;
+/*     */ import java.net.UnknownHostException;
+/*     */ import java.util.Date;
+/*     */ import java.util.Enumeration;
+/*     */ import java.util.zip.ZipEntry;
+/*     */ import java.util.zip.ZipFile;
+/*     */ import javax.servlet.http.HttpServletRequest;
+/*     */ import javax.sql.DataSource;
+/*     */ import org.apache.logging.log4j.LogManager;
+/*     */ import org.apache.logging.log4j.Logger;
+/*     */ import org.springframework.boot.Banner;
+/*     */ import org.springframework.boot.SpringApplication;
+/*     */ import org.springframework.boot.autoconfigure.SpringBootApplication;
+/*     */ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+/*     */ import org.springframework.jdbc.core.JdbcTemplate;
+/*     */ import org.springframework.jdbc.datasource.DriverManagerDataSource;
+/*     */ import org.springframework.util.DigestUtils;
+/*     */ import org.springframework.util.StringUtils;
+/*     */ 
+/*     */ @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+/*     */ public class ArknightsApplication {
+/*  38 */   public static final Logger LOGGER = LogManager.getLogger();
+/*  39 */   public static JdbcTemplate jdbcTemplate = null;
+/*  40 */   public static JSONObject serverConfig = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/config.json");
+/*  41 */   public static boolean enableServer = serverConfig.getJSONObject("server").getBooleanValue("enableServer");
+/*  42 */   public static JSONObject DefaultSyncData = new JSONObject();
+/*  43 */   public static JSONObject characterJson = new JSONObject();
+/*  44 */   public static JSONObject roguelikeTable = new JSONObject();
+/*  45 */   public static JSONObject stageTable = new JSONObject();
+/*  46 */   public static JSONObject itemTable = new JSONObject();
+/*  47 */   public static JSONObject mainStage = new JSONObject();
+/*  48 */   public static JSONObject normalGachaData = new JSONObject();
+/*  49 */   public static JSONObject uniequipTable = new JSONObject();
+/*  50 */   public static JSONObject skinGoodList = new JSONObject();
+/*  51 */   public static JSONObject skinTable = new JSONObject();
+/*  52 */   public static JSONObject charwordTable = new JSONObject();
+/*  53 */   public static JSONObject CrisisData = new JSONObject();
+/*  54 */   public static JSONObject CashGoodList = new JSONObject();
+/*  55 */   public static JSONObject GPGoodList = new JSONObject();
+/*  56 */   public static JSONObject LowGoodList = new JSONObject();
+/*  57 */   public static JSONObject HighGoodList = new JSONObject();
+/*  58 */   public static JSONObject ExtraGoodList = new JSONObject();
+/*  59 */   public static JSONObject LMTGSGoodList = new JSONObject();
+/*  60 */   public static JSONObject EPGSGoodList = new JSONObject();
+/*  61 */   public static JSONObject RepGoodList = new JSONObject();
+/*  62 */   public static JSONObject FurniGoodList = new JSONObject();
+/*  63 */   public static JSONObject SocialGoodList = new JSONObject();
+/*  64 */   public static JSONObject AllProductList = new JSONObject();
+/*  65 */   public static JSONObject unlockActivity = new JSONObject();
+/*  66 */   public static JSONObject roguelike = new JSONObject();
+/*  67 */   public static JSONArray loadedModNameList = new JSONArray();
+/*  68 */   public static JSONArray loadedModPathList = new JSONArray();
+/*  69 */   public static JSONArray loadedModDownloadList = new JSONArray();
+/*  70 */   public static JSONArray loadedModList = new JSONArray();
+/*     */   
+/*  72 */   public static JSONObject buildingData = new JSONObject();
+/*     */   
+/*  74 */   public static CommandManager ConsoleCommandManager = new CommandManager();
+/*     */ 
+/*     */   
+/*     */   public static ICommandSender Sender = () -> "Console";
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   public static void main(String[] args) throws Exception {
+/*  82 */     String host = serverConfig.getJSONObject("database").getString("host");
+/*  83 */     String port = serverConfig.getJSONObject("database").getString("port");
+/*  84 */     String dbname = serverConfig.getJSONObject("database").getString("dbname");
+/*  85 */     String username = serverConfig.getJSONObject("database").getString("username");
+/*  86 */     String password = serverConfig.getJSONObject("database").getString("password");
+/*  87 */     String extra = serverConfig.getJSONObject("database").getString("extra");
+/*     */ 
+/*     */     
+/*  90 */     DriverManagerDataSource dataSource = new DriverManagerDataSource();
+/*  91 */     dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+/*  92 */     dataSource.setUrl("jdbc:mysql://" + host + ":" + port + "/" + dbname + "?" + extra);
+/*  93 */     dataSource.setUsername(username);
+/*  94 */     dataSource.setPassword(password);
+/*  95 */     jdbcTemplate = new JdbcTemplate((DataSource)dataSource);
+/*     */ 
+/*     */     
+/*  98 */     SpringApplication springApplication = new SpringApplication(new Class[] { com.hypergryph.arknights.ArknightsApplication.class });
+/*  99 */     springApplication.setBannerMode(Banner.Mode.OFF);
+/*     */     
+/* 101 */     String[] disabledCommands = { "--server.port=" + serverConfig.getJSONObject("server").getString("https"), "--spring.profiles.active=default" };
+/*     */ 
+/*     */     
+/* 104 */     String[] fullArgs = StringUtils.concatenateStringArrays(args, disabledCommands);
+/* 105 */     springApplication.run(fullArgs);
+/*     */     
+/* 107 */     reloadServerConfig();
+/*     */     
+/* 109 */     String MysqlVersion = null;
+/* 110 */     LOGGER.info("检测数据库版本中...");
+/*     */     try {
+/* 112 */       MysqlVersion = userDao.queryMysqlVersion();
+/* 113 */     } catch (Exception e) {
+/* 114 */       LOGGER.error("无法连接至Mysql数据库");
+/* 115 */       System.exit(0);
+/*     */     } 
+/*     */     
+/* 118 */     if (Integer.valueOf(MysqlVersion.substring(0, 1)).intValue() < 8) {
+/* 119 */       LOGGER.error("Mysql版本需要 >= 8.0");
+/* 120 */       LOGGER.error("请升级后重试");
+/* 121 */       System.exit(0);
+/*     */     } 
+/*     */     
+/* 124 */     LOGGER.info("数据库版本 " + MysqlVersion);
+/* 125 */     LOGGER.info("服务端版本 1.9.4 Beta 3");
+/* 126 */     LOGGER.info("客户端版本 1.7.51");
+/* 127 */     LOGGER.info("构建时间 2022年03月15日14时18分");
+/* 128 */     if (serverConfig.getJSONObject("server").getString("GMKey") == null) {
+/* 129 */       serverConfig.getJSONObject("server").put("GMKey", randomPwd.getRandomPwd(64));
+/* 130 */       IOTools.SaveJsonFile(System.getProperty("user.dir") + "/config.json", serverConfig);
+/* 131 */       LOGGER.info("已生成新的随机管理员密钥");
+/*     */     } 
+/* 133 */     LOGGER.info("管理员密钥 " + serverConfig.getJSONObject("server").getString("GMKey"));
+/*     */     
+/* 135 */     if (!userDao.tableExists("account").booleanValue()) {
+/* 136 */       userDao.insertTable();
+/* 137 */       LOGGER.info("检测到玩家数据库不存在，已自动生成");
+/*     */     } 
+/*     */     
+/* 140 */     if (!userDao.tableExists("mail").booleanValue()) {
+/* 141 */       mailDao.insertTable();
+/* 142 */       LOGGER.info("检测到邮件数据库不存在，已自动生成");
+/*     */     } 
+/*     */     
+/* 145 */     getTimestamp();
+/*     */ 
+/*     */     
+/* 148 */     LOGGER.info("启动完成! 如果需要获取帮助,请输入 \"help\"");
+/*     */ 
+/*     */     
+/* 151 */     (new console()).start();
+/*     */   }
+/*     */ 
+/*     */ 
+/*     */   
+/*     */   public static void LoadMods() {
+/* 157 */     loadedModNameList = new JSONArray();
+/* 158 */     loadedModPathList = new JSONArray();
+/* 159 */     loadedModDownloadList = new JSONArray();
+/* 160 */     loadedModList = new JSONArray();
+/*     */     
+/* 162 */     JSONArray fileList = new JSONArray();
+/*     */     
+/* 164 */     searchDirectoryFile(new File(System.getProperty("user.dir") + "/mods"), fileList);
+/*     */     
+/* 166 */     for (Object filePath : fileList) {
+/*     */       
+/* 168 */       File modFile = new File(filePath.toString());
+/*     */       
+/* 170 */       ZipFile zipFile = null;
+/*     */       try {
+/* 172 */         zipFile = new ZipFile(modFile);
+/*     */         
+/* 174 */         if (zipFile.size() == 0)
+/* 175 */           continue;  Enumeration<? extends ZipEntry> entries = zipFile.entries();
+/* 176 */         while (entries.hasMoreElements()) {
+/*     */           
+/* 178 */           ZipEntry entry = entries.nextElement();
+/* 179 */           if (!entry.isDirectory() && 
+/* 180 */             entry.getName().indexOf(".ab") != -1) {
+/* 181 */             String modName = entry.getName();
+/* 182 */             if (loadedModNameList.contains(modName)) {
+/* 183 */               LOGGER.error(filePath + " 与已加载的Mod冲突，详细：");
+/* 184 */               LOGGER.error(modName);
+/*     */               
+/*     */               continue;
+/*     */             } 
+/* 188 */             InputStream modInputStream = zipFile.getInputStream(entry);
+/*     */             
+/* 190 */             byte[] buff = new byte[1024];
+/*     */             
+/* 192 */             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(); int num;
+/* 193 */             while ((num = modInputStream.read(buff, 0, buff.length)) != -1) {
+/* 194 */               byteArrayOutputStream.write(buff, 0, num);
+/*     */             }
+/* 196 */             byte[] modBuff = byteArrayOutputStream.toByteArray();
+/* 197 */             byteArrayOutputStream.flush();
+/* 198 */             byteArrayOutputStream.close();
+/* 199 */             long totalSize = modFile.length();
+/* 200 */             long abSize = modBuff.length;
+/* 201 */             String modMd5 = DigestUtils.md5DigestAsHex(modBuff);
+/*     */             
+/* 203 */             JSONObject abInfo = new JSONObject(true);
+/* 204 */             abInfo.put("name", modName);
+/* 205 */             abInfo.put("hash", modMd5);
+/* 206 */             abInfo.put("md5", modMd5);
+/* 207 */             abInfo.put("totalSize", Long.valueOf(totalSize));
+/* 208 */             abInfo.put("abSize", Long.valueOf(abSize));
+/* 209 */             LOGGER.info(modName + " 已加载");
+/* 210 */             loadedModList.add(abInfo);
+/* 211 */             loadedModPathList.add(modFile.getPath().replace("\\", "/"));
+/* 212 */             loadedModNameList.add(modName);
+/* 213 */             modName = modName.replace("/", "_");
+/* 214 */             modName = modName.replace("#", "__");
+/* 215 */             modName = modName.replace(".ab", ".dat");
+/* 216 */             loadedModDownloadList.add(modName);
+/*     */           } 
+/*     */         } 
+/*     */ 
+/*     */         
+/* 221 */         zipFile.close();
+/* 222 */       } catch (IOException e) {
+/* 223 */         e.printStackTrace();
+/*     */       } 
+/*     */     } 
+/*     */   }
+/*     */   
+/*     */   public static void searchDirectoryFile(File directoryPath, JSONArray fileList) {
+/* 229 */     File[] directory = directoryPath.listFiles();
+/* 230 */     for (File file : directory) {
+/* 231 */       if (file.isDirectory())
+/* 232 */         searchDirectoryFile(file, fileList); 
+/* 233 */       if (file.isFile())
+/* 234 */         fileList.add(file.getPath().replace("\\", "/")); 
+/*     */     } 
+/*     */   }
+/*     */   public static String getIpAddr(HttpServletRequest request) {
+/* 238 */     String ipAddress = null;
+/*     */     try {
+/* 240 */       ipAddress = request.getHeader("x-forwarded-for");
+/* 241 */       if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+/* 242 */         ipAddress = request.getHeader("Proxy-Client-IP");
+/*     */       }
+/* 244 */       if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+/* 245 */         ipAddress = request.getHeader("WL-Proxy-Client-IP");
+/*     */       }
+/* 247 */       if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+/* 248 */         ipAddress = request.getRemoteAddr();
+/* 249 */         if (ipAddress.equals("127.0.0.1")) {
+/*     */           
+/*     */           try {
+/* 252 */             ipAddress = InetAddress.getLocalHost().getHostAddress();
+/* 253 */           } catch (UnknownHostException e) {
+/* 254 */             e.printStackTrace();
+/*     */           } 
+/*     */         }
+/*     */       } 
+/*     */       
+/* 259 */       if (ipAddress != null) {
+/* 260 */         if (ipAddress.contains(",")) {
+/* 261 */           return ipAddress.split(",")[0];
+/*     */         }
+/* 263 */         return ipAddress;
+/*     */       } 
+/*     */       
+/* 266 */       return "";
+/*     */     }
+/* 268 */     catch (Exception e) {
+/* 269 */       e.printStackTrace();
+/* 270 */       return "";
+/*     */     } 
+/*     */   }
+/*     */   public static long getTimestamp() {
+/* 274 */     long ts = serverConfig.getJSONObject("timestamp").getLongValue(DateUtil.dayOfWeekEnum((Date)DateUtil.date()).toString().toLowerCase());
+/* 275 */     if (ts == -1L) {
+/* 276 */       ts = (new Date()).getTime() / 1000L;
+/*     */     }
+/* 278 */     return ts;
+/*     */   }
+/*     */   public static void reloadServerConfig() {
+/* 281 */     long startTime = System.currentTimeMillis();
+/* 282 */     LOGGER.info("载入服务器配置...");
+/* 283 */     serverConfig = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/config.json");
+/* 284 */     enableServer = serverConfig.getJSONObject("server").getBooleanValue("enableServer");
+/* 285 */     LOGGER.info("载入游戏数据...");
+/* 286 */     DefaultSyncData = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/defaultSyncData.json");
+/* 287 */     characterJson = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/excel/character_table.json");
+/* 288 */     roguelikeTable = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/excel/roguelike_topic_table.json");
+/* 289 */     stageTable = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/excel/stage_table.json").getJSONObject("stages");
+/* 290 */     itemTable = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/excel/item_table.json").getJSONObject("items");
+/* 291 */     mainStage = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/battle/stage.json").getJSONObject("MainStage");
+/* 292 */     normalGachaData = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/normalGacha.json");
+/* 293 */     uniequipTable = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/excel/uniequip_table.json").getJSONObject("equipDict");
+/* 294 */     skinGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/SkinGoodList.json");
+/* 295 */     skinTable = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/excel/skin_table.json").getJSONObject("charSkins");
+/* 296 */     charwordTable = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/excel/charword_table.json");
+/* 297 */     CashGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/CashGoodList.json");
+/* 298 */     GPGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/GPGoodList.json");
+/* 299 */     LowGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/LowGoodList.json");
+/* 300 */     HighGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/HighGoodList.json");
+/* 301 */     ExtraGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/ExtraGoodList.json");
+/* 302 */     LMTGSGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/LMTGSGoodList.json");
+/* 303 */     EPGSGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/EPGSGoodList.json");
+/* 304 */     RepGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/RepGoodList.json");
+/* 305 */     FurniGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/FurniGoodList.json");
+/* 306 */     SocialGoodList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/SocialGoodList.json");
+/* 307 */     AllProductList = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/shop/AllProductList.json");
+/* 308 */     unlockActivity = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/unlockActivity.json");
+/* 309 */     roguelike = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/roguelike.json");
+/*     */     
+/* 311 */     CrisisData = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/battle/crisis.json");
+/* 312 */     buildingData = IOTools.ReadJsonFile(System.getProperty("user.dir") + "/data/excel/building_data.json").getJSONObject("workshopFormulas");
+/*     */     
+/* 314 */     LOGGER.info("载入游戏Mod");
+/* 315 */     LoadMods();
+/*     */     
+/* 317 */     long endTime = System.currentTimeMillis();
+/* 318 */     LOGGER.info("载入完成，耗时：" + (endTime - startTime) + "ms");
+/*     */   }
+/*     */ }
+
+
+/* Location:              C:\Users\administered\Desktop\LocalArknights 1.9.4\hypergryph-1.9.4 Beta 3.jar!\BOOT-INF\classes\com\hypergryph\arknights\ArknightsApplication.class
+ * Java compiler version: 8 (52.0)
+ * JD-Core Version:       1.1.3
  */
-package com.hypergryph.arknights;
-
-import cn.hutool.core.date.DateUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.hypergryph.arknights.command.CommandManager;
-import com.hypergryph.arknights.command.ICommandSender;
-import com.hypergryph.arknights.console;
-import com.hypergryph.arknights.core.dao.mailDao;
-import com.hypergryph.arknights.core.dao.userDao;
-import com.hypergryph.arknights.core.file.IOTools;
-import com.hypergryph.arknights.core.function.randomPwd;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
-import javax.sql.DataSource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.boot.Banner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.util.StringUtils;
-
-/*
- * Exception performing whole class analysis ignored.
- */
-@SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
-public class ArknightsApplication {
-    public static final Logger LOGGER = LogManager.getLogger();
-    public static JdbcTemplate jdbcTemplate = null;
-    public static JSONObject serverConfig = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/config.json"));
-    public static boolean enableServer = serverConfig.getJSONObject("server").getBooleanValue("enableServer");
-    public static JSONObject DefaultSyncData = new JSONObject();
-    public static JSONObject characterJson = new JSONObject();
-    public static JSONObject roguelikeTable = new JSONObject();
-    public static JSONObject stageTable = new JSONObject();
-    public static JSONObject itemTable = new JSONObject();
-    public static JSONObject mainStage = new JSONObject();
-    public static JSONObject normalGachaData = new JSONObject();
-    public static JSONObject uniequipTable = new JSONObject();
-    public static JSONObject skinGoodList = new JSONObject();
-    public static JSONObject skinTable = new JSONObject();
-    public static JSONObject charwordTable = new JSONObject();
-    public static JSONObject CrisisData = new JSONObject();
-    public static JSONObject CashGoodList = new JSONObject();
-    public static JSONObject GPGoodList = new JSONObject();
-    public static JSONObject LowGoodList = new JSONObject();
-    public static JSONObject HighGoodList = new JSONObject();
-    public static JSONObject ExtraGoodList = new JSONObject();
-    public static JSONObject LMTGSGoodList = new JSONObject();
-    public static JSONObject EPGSGoodList = new JSONObject();
-    public static JSONObject RepGoodList = new JSONObject();
-    public static JSONObject FurniGoodList = new JSONObject();
-    public static JSONObject SocialGoodList = new JSONObject();
-    public static JSONObject AllProductList = new JSONObject();
-    public static JSONObject unlockActivity = new JSONObject();
-    public static JSONObject buildingData = new JSONObject();
-    public static CommandManager ConsoleCommandManager = new CommandManager();
-    public static ICommandSender Sender = () -> "Console";
-
-    public static void main(String[] args) throws Exception {
-        String host = serverConfig.getJSONObject("database").getString("host");
-        String port = serverConfig.getJSONObject("database").getString("port");
-        String dbname = serverConfig.getJSONObject("database").getString("dbname");
-        String username = serverConfig.getJSONObject("database").getString("username");
-        String password = serverConfig.getJSONObject("database").getString("password");
-        String extra = serverConfig.getJSONObject("database").getString("extra");
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        dataSource.setUrl("jdbc:mysql://" + host + ":" + port + "/" + dbname + "?" + extra);
-        dataSource.setUsername(username);
-        dataSource.setPassword(password);
-        jdbcTemplate = new JdbcTemplate((DataSource)dataSource);
-        SpringApplication springApplication = new SpringApplication(new Class[]{ArknightsApplication.class});
-        springApplication.setBannerMode(Banner.Mode.OFF);
-        String[] disabledCommands = new String[]{"--server.port=" + serverConfig.getJSONObject("server").getString("https"), "--spring.profiles.active=default"};
-        String[] fullArgs = StringUtils.concatenateStringArrays((String[])args, (String[])disabledCommands);
-        springApplication.run(fullArgs);
-        ArknightsApplication.reloadServerConfig();
-        String MysqlVersion = null;
-        LOGGER.info("检测数据库版本中...");
-        try {
-            MysqlVersion = userDao.queryMysqlVersion();
-        }
-        catch (Exception e) {
-            LOGGER.error("无法连接至Mysql数据库");
-            System.exit((int)0);
-        }
-        if (Integer.valueOf((String)MysqlVersion.substring(0, 1)) < 8) {
-            LOGGER.error("Mysql版本需要 >= 8.0");
-            LOGGER.error("请升级后重试");
-            System.exit((int)0);
-        }
-        LOGGER.info("数据库版本 " + MysqlVersion);
-        LOGGER.info("服务端版本 1.9.3");
-        LOGGER.info("客户端版本 1.7.21");
-        LOGGER.info("构建时间 2022年02月15日22时33分");
-        if (serverConfig.getJSONObject("server").getString("GMKey") == null) {
-            serverConfig.getJSONObject("server").put("GMKey", randomPwd.getRandomPwd((int)64));
-            IOTools.SaveJsonFile((String)(System.getProperty((String)"user.dir") + "/config.json"), (JSONObject)serverConfig);
-            LOGGER.info("已随机生成新的管理员密钥");
-        }
-        LOGGER.info("管理员密钥 " + serverConfig.getJSONObject("server").getString("GMKey"));
-        if (userDao.tableExists((String)"account").size() == 0) {
-            userDao.insertTable();
-            LOGGER.info("检测到玩家数据库不存在，已自动生成");
-        }
-        if (userDao.tableExists((String)"mail").size() == 0) {
-            mailDao.insertTable();
-            LOGGER.info("检测到邮件数据库不存在，已自动生成");
-        }
-        ArknightsApplication.getTimestamp();
-        LOGGER.info("服务端更新日志:");
-        LOGGER.info("[+] 新增控制台指令 /activity");
-        LOGGER.info("[+] 新增控制台指令 /unlock");
-        LOGGER.info("[+] 新增控制台指令 /upgrade");
-        LOGGER.info("[+] 新增控制台指令 /mail 感谢@rainy");
-        LOGGER.info("[*] 邮件储存方式更改为Mysql");
-        LOGGER.info("[*] 肉鸽持续开发中...");
-        LOGGER.info("启动完成! 如果需要获取帮助,请输入 \"help\"");
-        new console().start();
-    }
-
-    public static String getIpAddr(HttpServletRequest request) {
-        String ipAddress = null;
-        try {
-            ipAddress = request.getHeader("x-forwarded-for");
-            if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-                ipAddress = request.getHeader("Proxy-Client-IP");
-            }
-            if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
-                ipAddress = request.getHeader("WL-Proxy-Client-IP");
-            }
-            if ((ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) && (ipAddress = request.getRemoteAddr()).equals("127.0.0.1")) {
-                try {
-                    ipAddress = InetAddress.getLocalHost().getHostAddress();
-                }
-                catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (ipAddress != null) {
-                if (ipAddress.contains((CharSequence)",")) {
-                    return ipAddress.split(",")[0];
-                }
-                return ipAddress;
-            }
-            return "";
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-    public static long getTimestamp() {
-        long ts = serverConfig.getJSONObject("timestamp").getLongValue(DateUtil.dayOfWeekEnum((Date)DateUtil.date()).toString().toLowerCase());
-        if (ts == -1L) {
-            ts = new Date().getTime() / 1000L;
-        }
-        return ts;
-    }
-
-    public static void reloadServerConfig() {
-        long startTime = System.currentTimeMillis();
-        LOGGER.info("载入服务器配置...");
-        serverConfig = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/config.json"));
-        enableServer = serverConfig.getJSONObject("server").getBooleanValue("enableServer");
-        LOGGER.info("载入游戏数据...");
-        DefaultSyncData = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/defaultSyncData.json"));
-        characterJson = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/excel/character_table.json"));
-        roguelikeTable = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/excel/roguelike_topic_table.json"));
-        stageTable = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/excel/stage_table.json")).getJSONObject("stages");
-        itemTable = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/excel/item_table.json")).getJSONObject("items");
-        mainStage = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/battle/stage.json")).getJSONObject("MainStage");
-        normalGachaData = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/normalGacha.json"));
-        uniequipTable = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/excel/uniequip_table.json")).getJSONObject("equipDict");
-        skinGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/SkinGoodList.json"));
-        skinTable = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/excel/skin_table.json")).getJSONObject("charSkins");
-        charwordTable = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/excel/charword_table.json"));
-        CashGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/CashGoodList.json"));
-        GPGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/GPGoodList.json"));
-        LowGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/LowGoodList.json"));
-        HighGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/HighGoodList.json"));
-        ExtraGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/ExtraGoodList.json"));
-        LMTGSGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/LMTGSGoodList.json"));
-        EPGSGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/EPGSGoodList.json"));
-        RepGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/RepGoodList.json"));
-        FurniGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/FurniGoodList.json"));
-        SocialGoodList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/SocialGoodList.json"));
-        AllProductList = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/shop/AllProductList.json"));
-        unlockActivity = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/unlockActivity.json"));
-        CrisisData = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/battle/crisis.json"));
-        buildingData = IOTools.ReadJsonFile((String)(System.getProperty((String)"user.dir") + "/data/excel/building_data.json")).getJSONObject("workshopFormulas");
-        long endTime = System.currentTimeMillis();
-        LOGGER.info("载入完成，耗时：" + (endTime - startTime) + "ms");
-    }
-}
-

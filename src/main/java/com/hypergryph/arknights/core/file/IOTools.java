@@ -1,95 +1,68 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.alibaba.fastjson.JSON
- *  com.alibaba.fastjson.JSONObject
- *  com.alibaba.fastjson.parser.Feature
- *  com.alibaba.fastjson.serializer.SerializerFeature
- *  com.hypergryph.arknights.core.file.IOTools
- *  java.io.File
- *  java.io.FileInputStream
- *  java.io.FileOutputStream
- *  java.io.FileReader
- *  java.io.IOException
- *  java.io.InputStream
- *  java.io.InputStreamReader
- *  java.io.OutputStream
- *  java.io.OutputStreamWriter
- *  java.lang.Boolean
- *  java.lang.Object
- *  java.lang.String
- *  java.lang.StringBuffer
+/*    */ package BOOT-INF.classes.com.hypergryph.arknights.core.file;
+/*    */ import com.alibaba.fastjson.JSONObject;
+/*    */ import com.alibaba.fastjson.serializer.SerializerFeature;
+/*    */ import java.io.File;
+/*    */ import java.io.FileInputStream;
+/*    */ import java.io.FileReader;
+/*    */ import java.io.IOException;
+/*    */ import java.io.InputStreamReader;
+/*    */ import java.io.OutputStreamWriter;
+/*    */ import java.io.Reader;
+/*    */ 
+/*    */ public class IOTools {
+/*    */   public static String ReadNormalFile(String FilePath) {
+/*    */     try {
+/* 15 */       File jsonFile = new File(FilePath);
+/* 16 */       FileReader fileReader = new FileReader(jsonFile);
+/* 17 */       Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "UTF-8");
+/* 18 */       StringBuffer Buffer = new StringBuffer(); int ReadChar;
+/* 19 */       while ((ReadChar = reader.read()) != -1) {
+/* 20 */         Buffer.append((char)ReadChar);
+/*    */       }
+/* 22 */       fileReader.close();
+/* 23 */       reader.close();
+/* 24 */       return Buffer.toString();
+/* 25 */     } catch (IOException e) {
+/* 26 */       e.printStackTrace();
+/* 27 */       return null;
+/*    */     } 
+/*    */   }
+/*    */ 
+/*    */   
+/*    */   public static JSONObject ReadJsonFile(String JsonFilePath) {
+/*    */     try {
+/* 34 */       File jsonFile = new File(JsonFilePath);
+/* 35 */       FileReader fileReader = new FileReader(jsonFile);
+/* 36 */       Reader reader = new InputStreamReader(new FileInputStream(jsonFile), "UTF-8");
+/* 37 */       StringBuffer Buffer = new StringBuffer(); int ReadChar;
+/* 38 */       while ((ReadChar = reader.read()) != -1) {
+/* 39 */         Buffer.append((char)ReadChar);
+/*    */       }
+/* 41 */       fileReader.close();
+/* 42 */       reader.close();
+/* 43 */       return JSONObject.parseObject(Buffer.toString(), new Feature[] { Feature.OrderedField });
+/* 44 */     } catch (IOException e) {
+/* 45 */       e.printStackTrace();
+/* 46 */       return null;
+/*    */     } 
+/*    */   }
+/*    */   
+/*    */   public static Boolean SaveJsonFile(String JsonFilePath, JSONObject JsonData) {
+/*    */     try {
+/* 52 */       OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(JsonFilePath), "UTF-8");
+/* 53 */       osw.write(JSON.toJSONString(JsonData, new SerializerFeature[] { SerializerFeature.PrettyFormat, SerializerFeature.WriteMapNullValue }));
+/* 54 */       osw.flush();
+/* 55 */       osw.close();
+/* 56 */       return Boolean.valueOf(true);
+/* 57 */     } catch (IOException e) {
+/* 58 */       e.printStackTrace();
+/* 59 */       return Boolean.valueOf(false);
+/*    */     } 
+/*    */   }
+/*    */ }
+
+
+/* Location:              C:\Users\administered\Desktop\LocalArknights 1.9.4\hypergryph-1.9.4 Beta 3.jar!\BOOT-INF\classes\com\hypergryph\arknights\core\file\IOTools.class
+ * Java compiler version: 8 (52.0)
+ * JD-Core Version:       1.1.3
  */
-package com.hypergryph.arknights.core.file;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-
-public class IOTools {
-    public static String ReadNormalFile(String FilePath) {
-        try {
-            int ReadChar;
-            File jsonFile = new File(FilePath);
-            FileReader fileReader = new FileReader(jsonFile);
-            InputStreamReader reader = new InputStreamReader((InputStream)new FileInputStream(jsonFile), "UTF-8");
-            StringBuffer Buffer = new StringBuffer();
-            while ((ReadChar = reader.read()) != -1) {
-                Buffer.append((char)ReadChar);
-            }
-            fileReader.close();
-            reader.close();
-            return Buffer.toString();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static JSONObject ReadJsonFile(String JsonFilePath) {
-        try {
-            int ReadChar;
-            File jsonFile = new File(JsonFilePath);
-            FileReader fileReader = new FileReader(jsonFile);
-            InputStreamReader reader = new InputStreamReader((InputStream)new FileInputStream(jsonFile), "UTF-8");
-            StringBuffer Buffer = new StringBuffer();
-            while ((ReadChar = reader.read()) != -1) {
-                Buffer.append((char)ReadChar);
-            }
-            fileReader.close();
-            reader.close();
-            return JSONObject.parseObject((String)Buffer.toString(), (Feature[])new Feature[]{Feature.OrderedField});
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static Boolean SaveJsonFile(String JsonFilePath, JSONObject JsonData) {
-        try {
-            OutputStreamWriter osw = new OutputStreamWriter((OutputStream)new FileOutputStream(JsonFilePath), "UTF-8");
-            osw.write(JSON.toJSONString(JsonData, (SerializerFeature[])new SerializerFeature[]{SerializerFeature.PrettyFormat, SerializerFeature.WriteMapNullValue}));
-            osw.flush();
-            osw.close();
-            return true;
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-}
-
